@@ -117,17 +117,68 @@ const getAllReservations = function(guest_id, limit = 10) {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties = (options, limit = 10) => {
+const getAllProperties = function(options, limit = 10) {
+  
+  const queryParams = [];
+
+  let queryString = `
+  SELECT properties.*, avg(property_reviews.rating) as average_rating
+  FROM properties
+  JOIN property_reviews ON properties.id = property_id
+  `;
+
+  if (options.city) {
+    queryParams.push(`%${options.city}%`);
+    queryString += `WHERE city LIKE $${queryParams.length} `;
+  }
+
+  if (options.owner_id) {
+    queryParams.push(`${options.user_id}`);
+    if (queryParams.length > 0) {
+      queryString += ` AND `;
+    } else {
+      queryString += ` WHERE `;
+    }
+    queryString += `owner_id = $${queryParams.length}`;
+  }
+
+  if (options.minimum_price_per_night) {
+    queryParams.push(Number(`${options.minimum_price_per_night}`));
+    if (queryParams.length > 0) {
+      queryString += ` AND `;
+    } else {
+      queryString += ` WHERE `;
+    }
+    queryString += `cost_per_night >= $${queryParams.length}`;
+  }
+  if (options.maximum_price_per_night) {
+    queryParams.push(Number(`${options.maximum_price_per_night}`));
+    if (queryParams.length > 0) {
+      queryString += ` AND `;
+    } else {
+      queryString += ` WHERE `;
+    }
+    queryString += `cost_per_night <= $${queryParams.length}`;
+  }
+
+  queryParams.push(limit);
+  queryString += `
+  GROUP BY properties.id
+  ORDER BY cost_per_night
+  LIMIT $${queryParams.length};
+  `;
+
+  console.log(queryString, queryParams);
+
   return pool
-    .query(`SELECT * FROM properties LIMIT $1`, [limit])
+    .query(queryString, queryParams)
     .then((result) => {
-      // console.log(result.rows);
       return result.rows;
     })
     .catch((err) => {
-      // console.log(err.message);
+      console.log(err.message);
     });
-};
+}
 
 /**
  * Add a property to the database
