@@ -30,7 +30,7 @@ const getUserWithEmail = function(email) {
     .catch((err) => {
       console.log(err.message);
     });
-}
+};
 
 /**
  * Get a single user from the database given their id.
@@ -50,7 +50,7 @@ const getUserWithId = function(id) {
     .catch((err) => {
       console.log(err.message);
     });
-}
+};
 
 /**
  * Add a new user to the database.
@@ -64,18 +64,18 @@ const addUser =  function(user) {
       VALUES ($1, $2, $3)
       RETURNING *;
       `, [user.name, user.email, user.password]
-      )
-      .then((result) => {
-        if (result.rows[0]) {
-          return Promise.resolve(result.rows[0]);
-        } else {
-          return null;
-        }
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  }
+    )
+    .then((result) => {
+      if (result.rows[0]) {
+        return Promise.resolve(result.rows[0]);
+      } else {
+        return null;
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+};
 
 /// Reservations
 
@@ -107,7 +107,7 @@ const getAllReservations = function(guest_id, limit = 10) {
     .catch((err) => {
       console.log(err.message);
     });
-}
+};
 
 /// Properties
 
@@ -167,8 +167,6 @@ const getAllProperties = function(options, limit = 10) {
   LIMIT $${queryParams.length};
   `;
 
-  // console.log(queryString, queryParams);
-
   return pool
     .query(queryString, queryParams)
     .then((result) => {
@@ -177,7 +175,7 @@ const getAllProperties = function(options, limit = 10) {
     .catch((err) => {
       console.log(err.message);
     });
-}
+};
 
 /**
  * Add a property to the database
@@ -206,7 +204,7 @@ const addProperty = function(property) {
     property.parking_spaces,
     property.number_of_bathrooms,
     property.number_of_bedrooms
-  ]
+  ];
   const queryString = `
   INSERT INTO properties (
     owner_id,
@@ -241,7 +239,7 @@ const addProperty = function(property) {
       $14
     )
     RETURNING *;
-  `
+  `;
   return pool
     .query(queryString, queryParams)
     .then((result) => {
